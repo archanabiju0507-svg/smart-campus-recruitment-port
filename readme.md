@@ -94,18 +94,13 @@ npm start
 
 #### Screenshots (Add at least 3)
 
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+<img width="1913" height="940" alt="Screenshot 2026-02-28 121805" src="https:/<img width="1864" height="876" alt="Screenshot 2026-02-28 122452" src="https://github.com/user-attachments/assets/bdc7d66f-c08c-426e-ad44-81ba018a605f" />
+/github.com/user-attachments/assets/b3901712-7664-4fef-8d<img width="1906" height="913" alt="Screenshot 2026-02-28 124605" src="https://github.com/user-attachments/assets/2afd4297-a5b9-4126-9e9b-63bd348bbebc" />
+5a-bdd1edeac92e" />
+<img width="1819" height="425" alt="Screenshot 2026-02-28 122508" src="https://github.com/user-attachments/assets/c9573eff-c699-4019-b6dc-76edccc8d771" />
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
-
-#### Diagrams
-
-**System Architecture:**
+**System Architecture:**src="https://github.com/user-attachments/assets/19326d1c-d526-4eee-94ce-260e295010ee" />
 
 ![Architecture Diagram](docs/architecture.png)
 *Explain your system architecture - components, data flow, tech stack interaction*
