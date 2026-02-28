@@ -1,18 +1,7 @@
-import os
 from flask import Flask, render_template, jsonify, request
 import sqlite3
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-
-# Configuration for file uploads
-UPLOAD_FOLDER = 'static/uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# Limit file size to 2MB
-app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 
-
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
 
 def get_db_connection():
     conn = sqlite3.connect('database.db')
@@ -21,20 +10,18 @@ def get_db_connection():
 
 def init_db():
     conn = get_db_connection()
-    # Updated students table to include 'photo'
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS students (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            sgpa REAL,
-            cgpa REAL,
-            academic_performance TEXT,
-            skills TEXT,
-            external_events TEXT,
-            internships TEXT,
-            photo TEXT
-        )
-    ''')
+    conn.execute('DROP TABLE IF EXISTS jobs') # Reset for new column
+    conn.execute('''CREATE TABLE jobs 
+                 (id INTEGER PRIMARY KEY, title TEXT, company TEXT, 
+                  location TEXT, stipend TEXT, min_cgpa REAL)''')
+    
+    sample_jobs = [
+        ('Java Intern', 'Google', 'Bangalore', '₹35,000', 8.5),
+        ('SDE Intern', 'Amazon', 'Hyderabad', '₹40,000', 8.0),
+        ('Web Developer', 'TCS', 'Remote', '₹25,000', 6.5),
+        ('Data Analyst', 'Microsoft', 'Mumbai', '₹45,000', 9.0)
+    ]
+    conn.executemany('INSERT INTO jobs (title, company, location, stipend, min_cgpa) VALUES (?,?,?,?,?)', sample_jobs)
     conn.commit()
     conn.close()
 
@@ -42,37 +29,20 @@ def init_db():
 def index():
     return render_template('index.html')
 
-@app.route('/api/submit_profile', methods=['POST'])
-def submit_profile():
-    # When uploading files, we use request.form instead of request.json
-    try:
-        name = request.form.get('name')
-        sgpa = request.form.get('sgpa')
-        cgpa = request.form.get('cgpa')
-        performance = request.form.get('academic_performance')
-        skills = request.form.get('skills')
-        events = request.form.get('external_events')
-        internships = request.form.get('internships')
+@app.route('/api/jobs')
+def api_jobs():
+    conn = get_db_connection()
+    jobs = conn.execute('SELECT * FROM jobs').fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in jobs])
 
-        # Handle Photo Upload
-        photo_name = None
-        if 'photo' in request.files:
-            file = request.files['photo']
-            if file.filename != '':
-                photo_name = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], photo_name))
-
-        conn = get_db_connection()
-        conn.execute('''
-            INSERT INTO students (name, sgpa, cgpa, academic_performance, skills, external_events, internships, photo)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (name, sgpa, cgpa, performance, skills, events, internships, photo_name))
-        conn.commit()
-        conn.close()
-        
-        return jsonify({"status": "success", "message": "Profile and Photo saved successfully!"}), 201
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 400
+@app.route('/api/save-student', methods=['POST'])
+def save_student():
+    data = request.json
+    record = f"STUDENT: {data['name']} | CGPA: {data['cgpa']}\nInternships: {data['internships']}\n{'-'*30}\n"
+    with open('student_records.txt', 'a') as f:
+        f.write(record)
+    return jsonify({"message": "Profile synced and saved!"})
 
 if __name__ == '__main__':
     init_db()

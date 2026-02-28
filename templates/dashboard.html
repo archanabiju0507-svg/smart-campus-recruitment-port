@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Dashboard</title>
+</head>
+<body>
+    <header>
+        <h2>Welcome, {{ user }}</h2>
+        <a href="/logout">Logout</a>
+    </header>
+
+    <div class="container">
+        <aside class="profile-section">
+            <h3>Student Details</h3>
+            <form id="studentForm">
+                <input type="text" id="n" placeholder="Full Name" required>
+                <div class="row">
+                    <input type="number" id="cgpa" step="0.1" placeholder="CGPA" oninput="loadJobs()" required>
+                    <input type="number" id="sgpa" step="0.1" placeholder="SGPA" required>
+                </div>
+                <input type="text" id="photo" placeholder="Photo URL (e.g. image.jpg)">
+                <textarea id="certs" placeholder="Certificates"></textarea>
+                <textarea id="interns" placeholder="Internships"></textarea>
+                <textarea id="events" placeholder="External Events"></textarea>
+                <button type="submit">Save Profile & Apply</button>
+            </form>
+        </aside>
+
+        <main class="job-section">
+            <h3>Jobs Matching Your CGPA</h3>
+            <div id="jobGrid" class="grid"></div>
+        </main>
+    </div>
+
+    <script>
+        async function loadJobs() {
+            const res = await fetch('/api/jobs');
+            const jobs = await res.json();
+            const userCgpa = parseFloat(document.getElementById('cgpa').value) || 0;
+            
+            const grid = document.getElementById('jobGrid');
+            grid.innerHTML = '';
+
+            jobs.forEach(job => {
+                const isEligible = userCgpa >= job.min_cgpa;
+                grid.innerHTML += `
+                    <div class="card ${isEligible ? 'eligible' : 'locked'}">
+                        <h4>${job.title}</h4>
+                        <p><strong>${job.company}</strong></p>
+                        <p>Req. CGPA: ${job.min_cgpa}</p>
+                        <p style="color:green">Stipend: ${job.stipend}</p>
+                        <button ${!isEligible ? 'disabled' : ''}>${isEligible ? 'Apply' : 'Ineligible'}</button>
+                    </div>`;
+            });
+        }
+
+        document.getElementById('studentForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('n').value,
+                cgpa: document.getElementById('cgpa').value,
+                sgpa: document.getElementById('sgpa').value,
+                photo: document.getElementById('photo').value,
+                certs: document.getElementById('certs').value,
+                interns: document.getElementById('interns').value,
+                events: document.getElementById('events').value
+            };
+            const res = await fetch('/api/save', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            alert((await res.json()).msg);
+        };
+        window.onload = loadJobs;
+    </script>
+</body>
+</html>

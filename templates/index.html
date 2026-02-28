@@ -2,72 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Campus Recruitment Portal</title>
+    <title>Student Recruitment Board</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
     <header>
-        <h1>Campus Recruitment Portal</h1>
-        <p>Upload your details and photo to apply</p>
+        <h1>EduHire Portal</h1>
+        <p>3rd Year BTech Placement Board</p>
     </header>
 
-    <main class="container">
-        <form id="profileForm">
-            <div class="form-group">
-                <label>Profile Photo</label>
-                <input type="file" id="photo" accept="image/*">
-            </div>
-
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="name" required>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>SGPA</label>
-                    <input type="number" id="sgpa" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label>CGPA</label>
-                    <input type="number" id="cgpa" step="0.01">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Skills</label>
-                <textarea id="skills" placeholder="Java, Python..."></textarea>
-            </div>
-
-            <button type="submit">Submit Application</button>
-        </form>
-    </main>
+    <div class="container" id="job-container">
+        </div>
 
     <script>
-        document.getElementById('profileForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Use FormData for file uploads
-            const formData = new FormData();
-            formData.append('name', document.getElementById('name').value);
-            formData.append('sgpa', document.getElementById('sgpa').value);
-            formData.append('cgpa', document.getElementById('cgpa').value);
-            formData.append('skills', document.getElementById('skills').value);
-            
-            const photoField = document.getElementById('photo');
-            if (photoField.files[0]) {
-                formData.append('photo', photoField.files[0]);
-            }
-
-            const response = await fetch('/api/submit_profile', {
-                method: 'POST',
-                body: formData // No Content-Type header! Browser sets it for FormData
-            });
-
-            const result = await response.json();
-            alert(result.message);
-        });
+        // Fetch data from Flask API
+        fetch('/api/jobs')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('job-container');
+                data.forEach(job => {
+                    const card = `
+                        <div class="card">
+                            <h3>${job.title}</h3>
+                            <p><strong>Company:</strong> ${job.company}</p>
+                            <p><strong>Location:</strong> ${job.location}</p>
+                            <p class="price">${job.stipend}</p>
+                            <button onclick="alert('Applying to ${job.company}...')">Apply Now</button>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            })
+            .catch(err => console.error("Error loading jobs:", err));
     </script>
 </body>
 </html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Signup | EduHire</title>
+</head>
+<body class="login-page">
+    <div class="login-card">
+        <h2>Create Account</h2>
+        <input type="text" id="user" placeholder="Choose Username" required>
+        <input type="password" id="pass" placeholder="Create Password" required>
+        <button onclick="signup()">Register</button>
+        <p id="msg"></p>
+        <hr>
+        <p>Already have an account? <a href="/" style="color: #3498db;">Login here</a></p>
+    </div>
+
+    <script>
+        async function signup() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            if(!u || !p) { alert("Fill all fields"); return; }
+
+            const res = await fetch('/signup', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ u, p })
+            });
+            const data = await res.json();
+            const msg = document.getElementById('msg');
+            msg.innerText = data.message;
+            msg.style.color = res.ok ? "green" : "red";
+            
+            if(res.ok) {
+                setTimeout(() => window.location.href = '/', 2000);
+            }
+        }
+    </script>
+</body>
+</html>
